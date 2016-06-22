@@ -1,0 +1,137 @@
+<!doctype html>
+<html>
+<head>
+    <title>Polymer Redux demo</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1, user-scalable=yes">
+    <script src="../bower_components/webcomponentsjs/webcomponents-lite.js"></script>
+    <script src="../node_modules/redux/dist/redux.js"></script>
+    <link rel="import" href="../bower_components/iron-demo-helpers/demo-pages-shared-styles.html">
+    <link rel="import" href="../bower_components/iron-demo-helpers/demo-snippet.html">
+    <link rel="import" href="../bower_components/paper-input/all-imports.html">
+    <link rel="import" href="../bower_components/polymer-redux/polymer-redux.html">
+
+    <style is="custom-style" include="demo-pages-shared-styles">
+    </style>
+</head>
+<body>
+
+<div class="vertical-section-container">
+    <h3>Polymer Redux Demo</h3>
+    <demo-snippet>
+        <template>
+            <!-- redux setup -->
+            <script>
+                const reducer = (state, action) => {
+                    functions = {
+                        ADD_TODO: function (state){
+                            state.todo.push(action.todo);
+                            console.log(state);
+                            return state
+                        },
+                        REMOVE_TODO: function (state){
+                            const idx = state.todo.indexOf(action.todo);
+                            if (idx !== -1) {
+                                state.todo.splice(idx, 1)
+                            }
+                            console.log(state);
+                            return state
+                        },
+                        SORT_TODO: function (state){
+                            state.todo.sort();
+                            console.log(state);
+                            return state
+                        }
+                    };
+
+                    if (!state) return { todo: [] }
+                    return functions[action.type](state);
+
+                }
+                const store = Redux.createStore(reducer);
+                const ReduxBehavior = PolymerRedux(store)
+            </script>
+
+            <!-- todo list module -->
+            <dom-module id="todo-list">
+                <template>
+                    <p>
+                        <span>You have [[todo.length]] TO-DO(s).</span>
+                        <template is="dom-if" if="[[canSortTodos(todo.length)]]">
+                            <button on-click="sortTodos">Sort</button>
+                        </template>
+                    </p>
+                    <ul>
+                        <template is="dom-repeat" items="[[todo]]">
+                            <li>
+                                <span>[[item]]</span>
+                                <button on-click="removeTodo">Remove</button>
+                            </li>
+                        </template>
+                    </ul>
+
+                    <paper-input id="todo-name" placeholder="Name" on-keypress="handleKeypress" />
+                    <button on-click="addTodo">Add TODO</button>
+                </template>
+            </dom-module>
+            <script>
+                Polymer({
+                    is: 'todo-list',
+                    behaviors: [ ReduxBehavior ],
+                    properties: {
+                        todo: {
+                            type: Array,
+                            statePath: 'todo'
+                        }
+                    },
+                    actions: {
+                        add: function(name) {
+                            return {
+                                type: 'ADD_TODO',
+                                todo: name
+                            };
+                        },
+                        remove: function(name) {
+                            return {
+                                type: 'REMOVE_TODO',
+                                todo: name
+                            };
+                        },
+                        sort: function() {
+                            return {
+                                type: 'SORT_TODO'
+                            };
+                        },
+                    },
+                    addTodo: function() {
+                        const input = this.$['todo-name']
+                        if (input.value) {
+                            this.dispatch('add', input.value)
+                            input.value = ''
+                            input.focus()
+                        }
+                    },
+                    removeTodo: function(event) {
+                        this.dispatch('remove', event.model.item)
+                    },
+                    sortTodos: function() {
+                        this.dispatch('sort')
+                    },
+                    canSortTodos: function(length) {
+                        return length > 1
+                    },
+                    handleKeypress: function(event) {
+                        if (event.charCode === 13) {
+                            this.addTodo()
+                        }
+                    }
+                });
+            </script>
+
+            <!-- demo -->
+            <todo-list></todo-list>
+        </template>
+    </demo-snippet>
+</div>
+</body>
+</html>

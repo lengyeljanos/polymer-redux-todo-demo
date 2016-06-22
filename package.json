@@ -1,0 +1,18 @@
+{
+  "name": "demo-todo-app-polymer",
+  "version": "1.0.0",
+  "description": "Demo to-do application with polymer on redux",
+  "main": "index.js",
+  "author": "janos.lengyel",
+  "license": "ISC",
+  "dependencies": {
+    "react": "^15.1.0",
+    "react-redux": "^4.4.5",
+    "redux": "^3.5.2",
+    "redux-devtools": "^3.3.1"
+  },
+  "devDependencies": {
+    "webpack": "^1.13.1",
+    "webpack-dev-server": "^1.14.1"
+  }
+}
