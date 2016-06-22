@@ -1,0 +1,26 @@
+{
+  "name": "demo-todo-app-polymer",
+  "description": "Demo to-do application with polymer on redux",
+  "main": "index.js",
+  "authors": [
+    "janos.lengyel"
+  ],
+  "license": "ISC",
+  "homepage": "https://github.com/lengyeljanos/polymer-redux-todo-demo",
+  "moduleType": [],
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "webcomponentsjs": "^0.7.22",
+    "iron-demo-helpers": "^1.2.3",
+    "paper-input": "^1.1.11",
+    "polymer-redux": "^0.0.2",
+    "polymer": "^1.5.0"
+  }
+}
