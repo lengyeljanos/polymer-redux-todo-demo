@@ -4,20 +4,28 @@
     <title>Polymer Redux demo</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1, user-scalable=yes">
-    <script src="../bower_components/webcomponentsjs/webcomponents-lite.js"></script>
+    <script src="../bower_components/webcomponentsjs/webcomponents.js"></script>
     <script src="../node_modules/redux/dist/redux.js"></script>
+    <link rel="import" href="../bower_components/polymer-redux/polymer-redux.html">
     <link rel="import" href="../bower_components/iron-demo-helpers/demo-pages-shared-styles.html">
     <link rel="import" href="../bower_components/iron-demo-helpers/demo-snippet.html">
     <link rel="import" href="../bower_components/paper-input/all-imports.html">
-    <link rel="import" href="../bower_components/polymer-redux/polymer-redux.html">
+    <link rel="import" href="../bower_components/paper-button/paper-button.html">
+    <link rel="import" href="../bower_components/iron-icon/iron-icon.html">
+    <link rel="import" href="../bower_components/paper-checkbox/paper-checkbox.html">
+    <link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
+
+
 
     <style is="custom-style" include="demo-pages-shared-styles">
     </style>
 </head>
 <body>
-
 <div class="vertical-section-container">
-    <h3>Polymer Redux Demo</h3>
+    <h3><a href="#/todo">Polymer Redux Demo</a>
+        <a href="#/about">Another site</a>
+    </h3>
+
     <demo-snippet>
         <template>
             <!-- redux setup -->
@@ -38,10 +46,19 @@
                             return state
                         },
                         SORT_TODO: function (state){
-                            state.todo.sort();
+                            state.todo.sort(compare);
                             console.log(state);
                             return state
+                        },
+                        TOGGLE_TODO: function (state) {
+                            const idx = state.todo.indexOf(action.todo);
+                            if (idx !== -1) {
+                                state.todo.isComplete = true;
+                            }
+                            console.log(state);
+                            return state;
                         }
+
                     };
 
                     if (!state) return { todo: [] }
@@ -49,7 +66,14 @@
 
                 }
                 const store = Redux.createStore(reducer);
-                const ReduxBehavior = PolymerRedux(store)
+                const ReduxBehavior = PolymerRedux(store);
+                function compare(a,b) {
+                    if (a.taskName < b.taskName)
+                        return -1;
+                    if (a.taskName > b.taskName)
+                        return 1;
+                    return 0;
+                }
             </script>
 
             <!-- todo list module -->
@@ -58,30 +82,41 @@
                     <p>
                         <span>You have [[todo.length]] TO-DO(s).</span>
                         <template is="dom-if" if="[[canSortTodos(todo.length)]]">
-                            <button on-click="sortTodos">Sort</button>
+                            <paper-button on-click="sortTodos" raised="raised">Sort</paper-button>
                         </template>
                     </p>
-                    <ul>
+                    <ul style="list-style-type: none;">
                         <template is="dom-repeat" items="[[todo]]">
-                            <li>
-                                <span>[[item]]</span>
-                                <button on-click="removeTodo">Remove</button>
+                            <li style="padding: 5px; ">
+                                <paper-checkbox checked='{{ item.isComplete }}' class='flex-11 taskBox' on-change='toggleTask'>
+
+                                </paper-checkbox>
+                                {{ item.taskName }}
+                                <paper-icon-button
+                                        icon='delete'
+                                        class='flex-1'
+                                        style='color: gray'
+                                        on-click="removeTodo">
+                                </paper-icon-button>
                             </li>
                         </template>
                     </ul>
 
-                    <paper-input id="todo-name" placeholder="Name" on-keypress="handleKeypress" />
-                    <button on-click="addTodo">Add TODO</button>
+                    <paper-input id="todo-name" placeholder="Name" on-keypress="handleKeypress" ></paper-input>
+                    <paper-button on-click="addTodo" raised="raised">Add TODO</paper-button>
                 </template>
             </dom-module>
             <script>
+
+
+
                 Polymer({
                     is: 'todo-list',
                     behaviors: [ ReduxBehavior ],
                     properties: {
                         todo: {
                             type: Array,
-                            statePath: 'todo'
+                            statePath: 'todo',
                         }
                     },
                     actions: {
@@ -102,13 +137,21 @@
                                 type: 'SORT_TODO'
                             };
                         },
+                        toggle:function () {
+                            return{
+                                type: 'TOGGLE_TODO'
+                            }
+                        }
                     },
                     addTodo: function() {
-                        const input = this.$['todo-name']
+                        const input = this.$['todo-name'];
                         if (input.value) {
-                            this.dispatch('add', input.value)
-                            input.value = ''
-                            input.focus()
+                            todoObject = {};
+                            todoObject.taskName = input.value;
+                            todoObject.isComplete = false;
+                            this.dispatch('add', todoObject);
+                            input.value = '';
+                            input.focus();
                         }
                     },
                     removeTodo: function(event) {
@@ -118,12 +161,15 @@
                         this.dispatch('sort')
                     },
                     canSortTodos: function(length) {
-                        return length > 1
+                        return length > 1;
                     },
                     handleKeypress: function(event) {
                         if (event.charCode === 13) {
-                            this.addTodo()
+                            this.addTodo();
                         }
+                    },
+                    toggleTask: function(event){
+                        this.dispatch('toggle', event.model.item)
                     }
                 });
             </script>

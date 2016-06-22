@@ -6,6 +6,7 @@
   "author": "janos.lengyel",
   "license": "ISC",
   "dependencies": {
+    "bower": "^1.7.9",
     "react": "^15.1.0",
     "react-redux": "^4.4.5",
     "redux": "^3.5.2",
